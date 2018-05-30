@@ -1,0 +1,61 @@
+{#
+  Introducing the MySQL 8 Document Store
+  
+  This template defines the book template for use in the MyLibrary application
+  using the base template.
+  
+  Dr. Charles Bell, 2017
+#}
+{% extends "base.html" %}
+{% block title %}MyLibrary Search{% endblock %}
+{% block page_content %}
+  <form method=post> {{ form.csrf_token }}
+    <fieldset>
+      <legend>Book - Detail</legend>
+      {{ form.hidden_tag() }}
+      <div style=font-size:20pz; font-weight:bold; margin-left:150px;> 
+        {{ form.isbn.label }} <br>
+        {{ form.isbn(size=32) }} <br>
+        {{ form.title.label }} <br>
+        {{ form.title(size=100) }} <br>
+        {{ form.year.label }} <br>
+        {{ form.year(size=10) }} <br>
+        {{ form.edition.label }} <br>
+        {{ form.edition(size=10) }} <br>
+        {{ form.language.label }} <br>
+        {{ form.language(size=34) }} <br>
+        {{ form.pub_name.label }} <br>
+        {{ form.pub_name(style="width: 300px;") }} <br>
+        {{ form.pub_city.label }} <br>
+        {{ form.pub_city(style="width: 300px;") }} <br>
+        {{ form.pub_url.label }} <br>
+        {{ form.pub_url(style="width: 300px;") }} <br><br>
+        {{ form.authors.label }} <br>
+        {{ form.authors(size=100) }} <br>
+        {# Show the new note text field if this is an update. #}
+        {% if form.create_button.label.text == "Update" %}
+          <br>{{ form.new_note.label }} <br>
+          {{ form.new_note(rows='2',cols='100') }}
+        {% endif %}  
+        <br><br>
+        {{ form.create_button }} 
+        {% if form.del_button %}
+          {{ form.del_button }}
+        {% endif %}
+        <br><br>
+      </div>
+      {# Show the list of existing notes if there is a list. #}
+      {% if notes %}
+        <div>
+          <table border="1" cellpadding="1" cellspacing="1">
+            <tr><td><b>Notes</b></td></tr>
+            {% for note in notes %}
+              <tr><td style="width:600px"> {{ note }} </td></tr>
+            {% endfor %}
+          </table>
+          <br>
+        </div>
+      {% endif %}
+    </fieldset>  
+  </form>  
+{% endblock %}  

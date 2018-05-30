@@ -1,0 +1,30 @@
+{#
+  Introducing the MySQL 8 Document Store
+  
+  This template defines the publisher template for use in the MyLibrary application
+  using the base template.
+  
+  Dr. Charles Bell, 2017
+#}
+{% extends "base.html" %}
+{% block title %}MyLibrary Search{% endblock %}
+{% block page_content %}
+  <form method=post> {{ form.csrf_token }}
+    <fieldset>
+      <legend>Publisher - Detail</legend>
+      {{ form.hidden_tag() }}
+      <div style=font-size:20pz; font-weight:bold; margin-left:150px;s> 
+        {{ form.name.label }} <br>
+        {{ form.name(size=64) }} <br>
+        {{ form.city.label }} <br>
+        {{ form.city(size=48) }} <br>
+        {{ form.url.label }} <br>
+        {{ form.url(size=75) }} <br><br>
+        {{ form.create_button }} 
+        {% if form.del_button %}
+          {{ form.del_button }}
+        {% endif %}  
+      </div>
+    </fieldset>  
+  </form>  
+{% endblock %}  

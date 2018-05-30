@@ -1,0 +1,280 @@
+--- ./base/mylibrary_base.py	2018-01-05 15:55:10.000000000 -0500
++++ ./version1/mylibrary_v1.py	2018-01-06 15:02:20.000000000 -0500
+@@ -1,5 +1,5 @@
+ #
+-# Introducing the MySQL 8 Document Store - Base
++# Introducing the MySQL 8 Document Store - Project1
+ #
+ # This file contains the sample Python + Flask application for demonstrating
+ # how to build a simple relational database application. Thus, it relies on
+@@ -15,6 +15,7 @@
+ from wtforms import (HiddenField, TextField, TextAreaField, SelectField,
+                      SelectMultipleField, IntegerField, SubmitField)
+ from wtforms.validators import Required, Length
++from database.library_v1 import Library, Author, Publisher, Book
+ 
+ #
+ # Strings
+@@ -31,6 +32,13 @@
+ bootstrap = Bootstrap(app)
+ 
+ #
++# Setup the library database class
++#
++library = Library()
++# Provide your user credentials here
++library.connect(<user>, <password>, 'localhost', 3306)
++
++#
+ # Utility functions
+ #
+ def flash_errors(form):
+@@ -149,6 +157,7 @@
+         )
+         kind = 'book'
+         # Here, we get all books in the database
++        rows = library.get_books()
+         return render_template("list.html", form=form, rows=rows,
+                                columns=columns, kind=kind)
+     elif kind == 'author':
+@@ -161,6 +170,8 @@
+         )
+         kind = 'author'
+         # Here, we get all authors in the database
++        author = Author(library)
++        rows = author.read()
+         return render_template("list.html", form=form, rows=rows,
+                                columns=columns, kind=kind)
+     elif kind == 'publisher':
+@@ -173,6 +184,8 @@
+         )
+         kind = 'publisher'
+         # Here, we get all publishers in the database
++        publisher = Publisher(library)
++        rows = publisher.read()
+         return render_template("list.html", form=form, rows=rows,
+                                columns=columns, kind=kind)
+     else:
+@@ -187,9 +200,56 @@
+ @app.route('/author', methods=['GET', 'POST'])
+ @app.route('/author/<int:author_id>', methods=['GET', 'POST'])
+ def author(author_id=None):
++    author = Author(library)
+     form = AuthorForm()
++    form_authorid = form.authorid.data
++    firstname = form.firstname.data
++    lastname = form.lastname.data
++    if author_id:
++        form.create_button.label.text = "Update"
++        # Here, we get the data and populate the form
++        data = author.read(author_id)
++        if data == []:
++            flash("Author not found!")
++        form.authorid.data = data[0][0]
++        form.firstname.data = data[0][1]
++        form.lastname.data = data[0][2]
++    else:
++        del form.del_button
+     if request.method == 'POST':
+-        pass
++        # First, determine if we must create, update, or delete when form posts.
++        operation = "Create"
++        if form.create_button.data:
++            if form.create_button.label.text == "Update":
++                operation = "Update"
++        if form.del_button and form.del_button.data:
++            operation = "Delete"
++        if form.validate_on_submit():
++            # Get the data from the form here
++            if operation == "Create":
++                try:
++                    author.create(LastName=lastname, FirstName=firstname)
++                    flash("Added.")
++                    return redirect('/list/author')
++                except Exception as err:
++                    flash(err)
++            elif operation == "Delete":
++                try:
++                    author.delete(form_authorid)
++                    flash("Deleted.")
++                    return redirect('/list/author')
++                except Exception as err:
++                    flash(err)
++            else:
++                try:
++                    author.update(AuthorId=form_authorid, LastName=lastname,
++                                  FirstName=firstname)
++                    flash("Updated.")
++                    return redirect('/list/author')
++                except Exception as err:
++                    flash(err)
++        else:
++            flash_errors(form)
+     return render_template("author.html", form=form)
+ 
+ #
+@@ -200,9 +260,59 @@
+ @app.route('/publisher', methods=['GET', 'POST'])
+ @app.route('/publisher/<int:publisher_id>', methods=['GET', 'POST'])
+ def publisher(publisher_id=None):
++    publisher = Publisher(library)
+     form = PublisherForm()
++    form_publisherid = form.publisherid.data
++    name = form.name.data
++    city = form.city.data
++    url = form.url.data
++    if publisher_id:
++        # Here, we get the data and populate the form
++        form.create_button.label.text = "Update"
++        # Here, we get the data and populate the form
++        data = publisher.read(publisher_id)
++        if data == []:
++            flash("Publisher not found!")
++        form.publisherid.data = data[0][0]
++        form.name.data = data[0][1]
++        form.city.data = data[0][2]
++        form.url.data = data[0][3]
++    else:
++        del form.del_button
+     if request.method == 'POST':
+-            pass
++        # First, determine if we must create, update, or delete when form posts.
++        operation = "Create"
++        if form.create_button.data:
++            if form.create_button.label.text == "Update":
++                operation = "Update"
++        if form.del_button and form.del_button.data:
++            operation = "Delete"
++        if form.validate_on_submit():
++            # Get the data from the form here
++            if operation == "Create":
++                try:
++                    publisher.create(Name=name, City=city, URL=url)
++                    flash("Added.")
++                    return redirect('/list/publisher')
++                except Exception as err:
++                    flash(err)
++            elif operation == "Delete":
++                try:
++                    publisher.delete(form_publisherid)
++                    flash("Deleted.")
++                    return redirect('/list/publisher')
++                except Exception as err:
++                    flash(err)
++            else:
++                try:
++                    publisher.update(PublisherId=form_publisherid, Name=name,
++                                     City=city, URL=url)
++                    flash("Updated.")
++                    return redirect('/list/publisher')
++                except Exception as err:
++                    flash(err)
++        else:
++            flash_errors(form)
+     return render_template("publisher.html", form=form)
+ 
+ #
+@@ -214,12 +324,99 @@
+ @app.route('/book/<string:isbn_selected>', methods=['GET', 'POST'])
+ def book(isbn_selected=None):
+     notes = None
++    book = Book(library)
+     form = BookForm()
+-    form.publisher.choices = []
+-    form.authors.choices = []
+-    new_note = ""
++    isbn = form.isbn.data
++    title = form.title.data
++    year = form.year.data
++    authorids = form.authors.data
++    publisherid = form.publisher.data
++    edition = form.edition.data
++    language = form.language.data
++    #
++    # Here, we get the choices for the select lists
++    #
++    publisher = Publisher(library)
++    publishers = publisher.read()
++    publisher_list = []
++    for pub in publishers:
++        publisher_list.append((pub[0], '{0}'.format(pub[1])))
++    form.publisher.choices = publisher_list
++    author = Author(library)
++    authors = author.read()
++    author_list = []
++    for author in authors:
++        author_list.append((author[0],'{0}, {1}'.format(author[2], author[1])))
++    form.authors.choices = author_list
++    new_note = form.new_note.data
++
++    if isbn_selected:
++        # Here, we get the data and populate the form
++        data = book.read(isbn_selected)
++        if data == []:
++            flash("Book not found!")
++
++        #
++        # Here, we populate the data
++        #
++        form.isbn.data = data[0][0]
++        form.title.data = data[0][1]
++        form.year.data = data[0][2]
++        form.edition.data = data[0][3]
++        form.publisher.process_data(data[0][4])
++        form.language.data = data[0][5]
++        #
++        # Here, we get the author_ids for the authors
++        #
++        author_ids = book.read_author_ids(isbn_selected)[0][0]
++        form.authors.data = set(author_ids)
++
++        # We also must retrieve the notes for the book.
++        all_notes = book.read_notes(isbn_selected)
++        notes = []
++        for note in all_notes:
++            notes.append(note[2])
++        form.create_button.label.text = "Update"
++    else:
++        del form.del_button
+     if request.method == 'POST':
+-        pass
++        # First, determine if we must create, update, or delete when form posts.
++        operation = "Create"
++        if form.create_button.data:
++            if form.create_button.label.text == "Update":
++                operation = "Update"
++        if form.del_button and form.del_button.data:
++            operation = "Delete"
++        if form.validate_on_submit():
++            # Get the data from the form here
++            if operation == "Create":
++                try:
++                    book.create(ISBN=isbn, Title=title, Year=year,
++                                PublisherId=publisherid, Authors=authorids,
++                                Edition=edition, Language=language)
++                    flash("Added.")
++                    return redirect('/list/book')
++                except Exception as err:
++                    flash(err)
++            elif operation == "Delete":
++                try:
++                    book.delete(isbn)
++                    flash("Deleted.")
++                    return redirect('/list/book')
++                except Exception as err:
++                    flash(err)
++            else:
++                try:
++                    book.update(isbn_selected, ISBN=isbn, Title=title, Year=year,
++                                PublisherId=publisherid, Authors=authorids,
++                                Edition=edition, Language=language,
++                                Note=new_note)
++                    flash("Updated.")
++                    return redirect('/list/book')
++                except Exception as err:
++                    flash(err)
++        else:
++            flash_errors(form)
+     return render_template("book.html", form=form, notes=notes)
+ 
+ #

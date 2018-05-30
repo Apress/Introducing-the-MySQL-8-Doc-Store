@@ -1,0 +1,42 @@
+-- Dump created by MySQL pump utility, version: 8.0.3-rc, macos10.12 (x86_64)
+-- Dump start time: Thu Jan 18 21:14:33 2018
+-- Server version: 8.0.3
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE;
+SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET @@SESSION.SQL_LOG_BIN= 0;
+SET @OLD_TIME_ZONE=@@TIME_ZONE;
+SET TIME_ZONE='+00:00';
+SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT;
+SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS;
+SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION;
+SET NAMES utf8mb4;
+DROP DATABASE `contact_list2`;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `contact_list2` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
+CREATE TABLE `contact_list2`.`contacts` (
+`contact_id` int(11) NOT NULL AUTO_INCREMENT,
+`first` char(30) DEFAULT NULL,
+`last` char(30) DEFAULT NULL,
+`addresses` json DEFAULT NULL,
+`email_addresses` json DEFAULT NULL,
+`phones` json DEFAULT NULL,
+PRIMARY KEY (`contact_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+;
+SET TIME_ZONE=@OLD_TIME_ZONE;
+SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT;
+SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS;
+SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+SET SQL_MODE=@OLD_SQL_MODE;
+-- Dump end time: Thu Jan 18 21:14:34 2018
+INSERT INTO contact_list2.contacts VALUES(
+  NULL, 'Bill', 'Smith',
+  '{"addresses":[{"address_type":"home","street1":"123 Main Street","street2":"","city":"Anywhere","state":"VT","zip":12388}]}',
+  '{"email_addresses":["bill@smithmanufacturing.co","bill.smith@gomail.com"]}',
+  '{"phones":[{"area_code":301,"exchange":555,"number":1212}]}'
+);
+

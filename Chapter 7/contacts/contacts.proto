@@ -1,0 +1,17 @@
+syntax = "proto2";
+
+message Contact {
+  required string first = 1;
+  required int32 id = 2;
+  optional string last = 3;
+
+  message PhoneNumber {
+    required string number = 1;
+  }
+
+  repeated PhoneNumber phones = 5;
+}
+
+message Contacts {
+  repeated Contact list = 1;
+}
